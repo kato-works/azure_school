@@ -5,6 +5,31 @@
 - デプロイ方法 (GitHub Actions, ZIP Deploy) とロギング
 - マネージド ID を使った Azure リソースアクセス
 
+## App Service の役割
+- **フルマネージドな Web ホスティング**: OS/ランタイムのパッチやスケールを Azure が管理し、開発者はアプリコードに集中できる。
+- **スケールと SLA**: プランに応じて手軽に垂直/水平スケールが可能で、SLA が明確に定義されている。
+- **統合サービス**: マネージド ID による安全なリソースアクセス、デプロイ スロット、診断ログ、App Insights などの運用機能を備える。
+
+## az コマンドによる作成とデプロイの流れ
+以下は Linux 上に Python アプリをデプロイする例。
+1. リソースグループと App Service プラン、Web App を作成
+   ```bash
+   az group create -n my-rg -l japaneast
+   az appservice plan create -n my-plan -g my-rg --sku B1 --is-linux
+   az webapp create -n my-webapp -g my-rg --plan my-plan --runtime "PYTHON|3.10"
+   ```
+2. デプロイ (ZIP Deploy の例)
+   ```bash
+   # アプリ一式を zip 化してアップロード
+   zip -r app.zip .
+   az webapp deploy --resource-group my-rg --name my-webapp --src-path app.zip --type zip
+   ```
+3. ログの確認とストリーミング
+   ```bash
+   az webapp log config --name my-webapp --resource-group my-rg --application-logging filesystem
+   az webapp log tail --name my-webapp --resource-group my-rg
+   ```
+
 ## Python (Flask) デプロイ用サンプル
 `app.py`
 ```python
